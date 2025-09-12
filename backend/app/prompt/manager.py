@@ -29,9 +29,5 @@ class PromptManager:
 
         return prompts
 
-    def get_prompt(self, prompt_name: str, default: str = None) -> str:
-        default_prompt = default or settings.default_prompt
-        return self.prompts.get(prompt_name, self.prompts.get(default_prompt, ""))
-
-    def list_prompts(self) -> Dict[str, str]:
-        return {name: content[:100] + "..." for name, content in self.prompts.items()}
+    def get_system_prompt(self) -> str:
+        return self.prompts.get(settings.system_prompt)

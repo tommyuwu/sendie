@@ -10,21 +10,27 @@ class ModelProvider(str, Enum):
 
 
 class Settings(BaseSettings):
-    ollama_host: str = "http://ollama:11434"
-    ollama_model: str = "llama3.2:3b"
+    ollama_host: str = ''
+    ollama_model: str = ''
 
     openai_api_key: Optional[str] = ''
-    openai_tommy_key: Optional[str] = ''
-    openai_model: str = "gpt-5-nano"
+    openai_model: str = ''
 
+    title: str = ''
     model_provider: ModelProvider = ModelProvider.OPENAI
-    knowledge_base_path: str = "knowledges"
-    prompts_dir: str = "prompts"
-    default_prompt: str = "default"
+    knowledge_base_path: str = ''
+    knowledge_base_json_file: str = ''
+    prompts_dir: str = ''
+    system_prompt: str = ''
 
-    redis_host: str = "redis"
-    redis_port: int = 6379
+    redis_host: str = ''
+    redis_port: int = 0
     redis_db: int = 0
+
+    max_history_turns: int = 5
+    max_prompt_tokens: int = 3000
+    max_doc_tokens: int = 500
+    max_doc_chars = 600
 
     class Config:
         env_file = ".env"

@@ -1,5 +1,4 @@
 import logging
-from typing import List, Dict, Any
 
 import ollama
 
@@ -8,7 +7,6 @@ from ..api.models import ChatRequest
 from ..core.config import settings
 from ..knowledge.retriever import KnowledgeRetriever
 from ..prompt.manager import PromptManager
-from ..utils.helpers import create_message
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +30,9 @@ class OllamaService(LLMService):
     async def generate_response(self, req: ChatRequest, **kwargs) -> str:
         try:
             knowledge = self.knowledge_retriever.get_relevant_documents(req.message, k=3)
-            prompt = self.prompt_manager.get_prompt(req.prompt_name)
-            message = create_message(user_input=req.message, knowledge=knowledge, prompt=prompt)
-
+            prompt = self.prompt_manager.get_system_prompt()
+            # message = build_messages(user_input=req.message, knowledge=knowledge, prompt=prompt)
+            message = ''
             response = self.client.generate(
                 model=self.model,
                 prompt=message,
@@ -44,22 +42,3 @@ class OllamaService(LLMService):
         except Exception as e:
             logger.error(f"Error generating response with Ollama: {e}")
             raise
-
-    async def list_models(self) -> List[str]:
-        try:
-            models = self.client.list()
-            return [model["model"] for model in models.get("models", [])]
-        except Exception as e:
-            logger.error(f"Error listing Ollama models: {e}")
-            return []
-
-    async def get_model_info(self) -> Dict[str, Any]:
-        try:
-            models = self.client.list()
-            for model in models.get("models", []):
-                if model["model"] == self.model:
-                    return model
-            return {}
-        except Exception as e:
-            logger.error(f"Error getting Ollama model info: {e}")
-            return {}

@@ -32,7 +32,7 @@ app.include_router(redis_router, prefix="/api/v1")
 async def root():
     return {
         "message": settings.title,
-        "version": "1.0.0",
+        "version": "1.0.1",
         "provider": settings.model_provider.value
     }
 

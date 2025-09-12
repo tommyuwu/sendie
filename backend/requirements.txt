@@ -1,12 +1,14 @@
 fastapi
-uvicorn[standard]
+uvicorn
+pydantic
+redis
 langchain-community
-chromadb
-torch --extra-index-url https://download.pytorch.org/whl/cpu
-sentence-transformers
 ollama
 openai
-python-multipart
-python-dotenv
-pydantic-settings
-redis
+sentence-transformers
+jq
+chromadb
+#torch --extra-index-url https://download.pytorch.org/whl/cpu
+#sentence-transformers
+#python-multipart
+#python-dotenv

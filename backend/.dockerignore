@@ -14,4 +14,3 @@ venv.bak/
 README.md
 Dockerfile
 .dockerignore
-test/

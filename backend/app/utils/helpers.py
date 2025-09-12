@@ -1,7 +1,27 @@
-def create_message(user_input: str, knowledge: list[str], prompt: str) -> str:
-    input_parts = [f"Prompt:\n{prompt}"]
+def build_messages(
+        system_prompt: str,
+        history: list[dict],
+        knowledge: list[str],
+        user_message: str
+) -> str:
+    messages = [{"role": "system", "content": system_prompt}]
+
+    messages.extend(history)
+
     if knowledge:
-        docs_text = "\n\n".join(knowledge)
-        input_parts.append(f"Knowledge:\n{docs_text}")
-    input_parts.append(f"User input: {user_input}")
-    return "\n\n".join(input_parts)
+        docs_text = "\n- ".join(knowledge)
+        messages.append({
+            "role": "system",
+            "content": f"Contexto recuperado de la base de conocimiento:\n- {docs_text}"
+        })
+
+    messages.append({"role": "user", "content": user_message})
+
+    return flatten_messages(messages)
+
+
+def flatten_messages(messages: list[dict]) -> str:
+    lines = []
+    for m in messages:
+        lines.append(f"{m['role'].capitalize()}: {m['content']}")
+    return "\n".join(lines)

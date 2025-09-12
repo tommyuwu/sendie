@@ -1,4 +1,5 @@
 from redis.asyncio import Redis
+
 from .config import settings
 
 
