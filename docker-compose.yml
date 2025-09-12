@@ -1,0 +1,44 @@
+services:
+  ollama:
+    container_name: sendia-ollama
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - chatbot-net
+
+  backend:
+    container_name: sendia-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - ENVIRONMENT=devel
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - ollama
+    networks:
+      - chatbot-net
+
+  redis:
+    container_name: sendia-redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - chatbot-net
+
+networks:
+  chatbot-net:
+    driver: bridge
+
+volumes:
+  ollama-data:

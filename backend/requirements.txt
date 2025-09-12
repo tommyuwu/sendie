@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+langchain-community
+chromadb
+torch --extra-index-url https://download.pytorch.org/whl/cpu
+sentence-transformers
+ollama
+openai
+python-multipart
+python-dotenv
+pydantic-settings
+redis
