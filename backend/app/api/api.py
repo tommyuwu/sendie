@@ -1,6 +1,7 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
+from redis.asyncio import Redis
 
 from .models import HealthResponse
 from ..knowledge.retriever import KnowledgeRetriever
@@ -9,7 +10,6 @@ from ..service.factory import LLMServiceFactory
 from ..service.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter()
 
 
@@ -23,6 +23,10 @@ def get_knowledge_retriever() -> KnowledgeRetriever:
 
 def get_prompt_manager() -> PromptManager:
     return PromptManager()
+
+
+async def get_redis_client(request: Request) -> Redis:
+    return request.app.state.redis
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -41,3 +45,9 @@ async def health_check(
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
+
+
+@router.get("/redis")
+async def get_redis(redis: Redis = Depends(get_redis_client)):
+    pong = await redis.ping()
+    return {"status": "Redis connected", "pong": pong}

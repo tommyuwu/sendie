@@ -3,12 +3,13 @@ uvicorn
 pydantic
 redis
 langchain-community
+langchain-openai
 ollama
 openai
 sentence-transformers
 jq
 chromadb
+nltk
 #torch --extra-index-url https://download.pytorch.org/whl/cpu
-#sentence-transformers
 #python-multipart
 #python-dotenv

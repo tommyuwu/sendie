@@ -1,21 +1,44 @@
+from typing import List, Dict, Any
+
+
 def build_messages(
         system_prompt: str,
-        history: list[dict],
-        knowledge: list[str],
+        history: List[Dict[str, str]],
+        knowledge: List[str],
         user_message: str
 ) -> str:
-    messages = [{"role": "system", "content": system_prompt}]
-
-    messages.extend(history)
+    messages = [{
+        "role": "system",
+        "content": system_prompt
+    }]
 
     if knowledge:
-        docs_text = "\n- ".join(knowledge)
+        knowledge_context = "INFORMACIÓN DISPONIBLE DEL SISTEMA:\n\n"
+        for i, doc in enumerate(knowledge, 1):
+            knowledge_context += f"[Documento {i}]\n{doc}\n\n"
+
         messages.append({
             "role": "system",
-            "content": f"Contexto recuperado de la base de conocimiento:\n- {docs_text}"
+            "content": knowledge_context + "\nUsa esta información para responder las consultas del usuario de manera precisa.\n\n"
         })
 
-    messages.append({"role": "user", "content": user_message})
+    if history and len(history) > 0:
+        messages.append({
+            "role": "system",
+            "content": "HISTORIAL DE MENSAJES:\n"
+        })
+        for msg in history[-6:]:
+            messages.append(msg)
+    else:
+        messages.append({
+            "role": "system",
+            "content": "**NUEVA CONVERSACION**\n"
+        })
+
+    messages.append({
+        "role": "user",
+        "content": user_message
+    })
 
     return flatten_messages(messages)
 
