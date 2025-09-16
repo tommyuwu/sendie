@@ -22,97 +22,49 @@ stop_words = set(stopwords.words("spanish"))
 logger = logging.getLogger(__name__)
 
 
-def _format_envios(item: Dict[str, Any]) -> str:
-    subtipo = item.get('subtipo', '')
-    detalle = item.get('detalle', {})
-
-    content = f"INFORMACIÓN DE ENVÍOS - {subtipo.upper()}\n"
-
-    if subtipo == 'aéreo':
-        content += f"Origen: {detalle.get('origen', 'N/A')}\n"
-        content += f"Días de salida desde Miami: {', '.join(detalle.get('dias_salida', []))}\n"
-        content += f"Días de entrega en Asunción: {', '.join(detalle.get('entregas_asuncion', []))}\n"
-        content += f"Tiempo estimado de entrega: {detalle.get('tiempo_estimado', 'N/A')}\n"
-    elif subtipo == 'marítimo':
-        content += f"Tiempo estimado de entrega: {detalle.get('tiempo_estimado', 'N/A')}\n"
-
-    return content
+def _flatten_dict(d: Dict[str, Any], indent: int = 0) -> str:
+    lines = []
+    prefix = "  " * indent
+    for k, v in d.items():
+        if isinstance(v, dict):
+            lines.append(f"{prefix}{k}:")
+            lines.append(_flatten_dict(v, indent + 1))
+        elif isinstance(v, list):
+            lines.append(f"{prefix}{k}: {', '.join(map(str, v))}")
+        else:
+            lines.append(f"{prefix}{k}: {v}")
+    return "\n".join(lines)
 
 
-def _format_horarios(item: Dict[str, Any]) -> str:
-    return (f"HORARIOS DE ATENCIÓN\n"
-            f"Ubicación: {item.get('ubicacion', 'N/A')}\n"
-            f"Horario: {item.get('horario', 'N/A')}\n")
-
-
-def _format_tarifas(item: Dict[str, Any]) -> str:
-    modalidad = item.get('modalidad', '')
-    content = f"TARIFAS DE ENVÍO - {modalidad.upper()}\n"
-
-    if modalidad == 'aéreo':
-        content += f"Peso mínimo: {item.get('peso_minimo', 'N/A')}\n"
-        content += f"Precio base mínimo: ${item.get('precio_minimo', 'N/A')} USD/kg\n"
-        content += "Tarifas por sucursal (USD/kg):\n"
-    elif modalidad == 'marítimo':
-        content += f"Peso mínimo: {item.get('peso_minimo', 'N/A')}\n"
-        content += f"Precio base mínimo: ${item.get('precio_minimo', 'N/A')} USD/kg\n"
-        content += "Tarifas por sucursal (USD/kg):\n"
-
-    sucursales = item.get('sucursales', {})
-    for sucursal, precio in sucursales.items():
-        content += f"  - {sucursal}: ${precio} USD/kg\n"
-
-    return content
-
-
-def _format_nota(item: Dict[str, Any]) -> str:
-    content = "NOTAS IMPORTANTES:\n"
-    detalles = item.get('detalle', [])
-    for i, detalle in enumerate(detalles, 1):
-        content += f"{i}. {detalle}\n"
-    return content
-
-
-def _format_faq(item: Dict[str, Any]) -> str:
-    pregunta = item.get('pregunta', '')
-    respuesta = item.get('respuesta', '')
-    return f"PREGUNTA FRECUENTE:\nP: {pregunta}\nR: {respuesta}\n"
+def _format_default(item: Dict[str, Any]) -> str:
+    tipo = item.get("tipo", "general").upper()
+    return f"{tipo}\n{_flatten_dict(item)}"
 
 
 def _process_json_to_documents(json_path: str) -> List[Document]:
     documents = []
-
     try:
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         for item in data:
-            if item.get('tipo') == 'envíos':
-                content = _format_envios(item)
-            elif item.get('tipo') == 'horarios':
-                content = _format_horarios(item)
-            elif item.get('tipo') == 'tarifas':
-                content = _format_tarifas(item)
-            elif item.get('tipo') == 'nota':
-                content = _format_nota(item)
-            elif item.get('tipo') == 'FAQ':
-                content = _format_faq(item)
-            else:
-                content = json.dumps(item, ensure_ascii=False, indent=2)
+            tipo = item.get("tipo", "general")
+
+            content = _format_default(item)
 
             doc = Document(
                 page_content=content,
                 metadata={
-                    'tipo': item.get('tipo', 'general'),
-                    'tags': item.get('tags', ''),
-                    'modalidad': item.get('modalidad', ''),
-                    'source': json_path
-                }
+                    "tipo": tipo,
+                    "tags": item.get("tags", ""),
+                    "modalidad": item.get("modalidad", ""),
+                    "source": json_path,
+                },
             )
             documents.append(doc)
 
     except Exception as e:
-        logger.error(f"Error procesando JSON: {e}")
+        logger.error(f"Error procesando JSON {json_path}: {e}")
 
     return documents
 
@@ -198,10 +150,11 @@ class KnowledgeRetriever:
 
             results = []
             for doc, score in docs:
+                # logger.info(f"doc: {doc}")
                 snippet = doc.page_content.strip()
                 results.append(snippet)
-                logger.info(f"doc: {snippet}")
-                logger.info(f"Se agrego el doc (tipo: {doc.metadata.get('tipo')}) con score {score}")
+
+                logger.info(f"Se agrego el doc (tipo: {doc.metadata.get('tipo')}), con score: {score}")
 
             return results
 

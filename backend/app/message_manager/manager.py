@@ -24,7 +24,7 @@ class MessageManager:
             if line_decoded.startswith("Usuario:"):
                 history.append({"role": "user", "content": line_decoded[8:].strip()})
             elif line_decoded.startswith("Bot:"):
-                history.append({"role": "assistant", "content": line_decoded[4:].strip()})
+                history.append({"role": "assistant", "content": line_decoded[4:].strip() + "\n"})
 
         return history
 

@@ -23,6 +23,8 @@ services:
     environment:
       - ENVIRONMENT=devel
       - OLLAMA_BASE_URL=http://ollama:11434
+    env_file:
+      - ./backend/.env
     depends_on:
       - ollama
     networks:

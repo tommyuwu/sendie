@@ -9,17 +9,17 @@ def build_messages(
 ) -> str:
     messages = [{
         "role": "system",
-        "content": system_prompt
+        "content": system_prompt + "\n\n"
     }]
 
     if knowledge:
-        knowledge_context = "INFORMACIÓN DISPONIBLE DEL SISTEMA:\n\n"
+        knowledge_context = "INFORMACIÓN DISPONIBLE DEL SISTEMA - Usa esta información para responder las consultas del usuario de manera precisa:\n\n"
         for i, doc in enumerate(knowledge, 1):
             knowledge_context += f"[Documento {i}]\n{doc}\n\n"
 
         messages.append({
             "role": "system",
-            "content": knowledge_context + "\nUsa esta información para responder las consultas del usuario de manera precisa.\n\n"
+            "content": knowledge_context
         })
 
     if history and len(history) > 0:
@@ -35,6 +35,10 @@ def build_messages(
             "content": "**NUEVA CONVERSACION**\n"
         })
 
+    messages.append({
+        "role": "system",
+        "content": "NUEVO MENSAJE DEL USUARIO:\n"
+    })
     messages.append({
         "role": "user",
         "content": user_message

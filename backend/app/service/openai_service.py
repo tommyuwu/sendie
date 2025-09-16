@@ -132,7 +132,7 @@ class OpenAIService(LLMService):
     async def generate_response(self, req: ChatRequest, redis: Redis, **kwargs) -> ChatResponse:
         try:
 
-            knowledge = self.knowledge_retriever.get_relevant_documents(req.message, k=3)
+            knowledge = self.knowledge_retriever.get_relevant_documents(req.message, k=5)
             prompt = self.prompt_manager.get_system_prompt()
             history = await self.message_manager.get_history(req.session_id, redis)
 
@@ -146,7 +146,7 @@ class OpenAIService(LLMService):
             )
             logger.info(f"Mensaje final: {final_message}")
 
-            # return None
+            #return None
             response = self.client.responses.create(
                 model=self.model,
                 input=final_message,
