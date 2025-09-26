@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     openai_api_key: Optional[str] = ''
     openai_model: str = ''
+    openai_pmpt_id: str = ''
 
     title: str = ''
     model_provider: ModelProvider = ModelProvider.OPENAI

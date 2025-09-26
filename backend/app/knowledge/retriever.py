@@ -150,10 +150,9 @@ class KnowledgeRetriever:
 
             results = []
             for doc, score in docs:
-                # logger.info(f"doc: {doc}")
                 snippet = doc.page_content.strip()
                 results.append(snippet)
-
+                logger.info(f"doc: {snippet}")
                 logger.info(f"Se agrego el doc (tipo: {doc.metadata.get('tipo')}), con score: {score}")
 
             return results
